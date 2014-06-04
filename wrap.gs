@@ -1,7 +1,6 @@
-//D - класс базы данных Parse.com
-var D = function (appId, restId) {
+var ParseDb = function (appId, restId) {
   if (!appId || !restId) {
-    throw("Должны быть указаны оба обязательных параметра appId, restId.");
+    throw("Both parameters are required appId, restId.");
   }
   var pm = new ParseMachine (appId,restId);
   var addItem = function (table, object) {
@@ -20,7 +19,10 @@ var D = function (appId, restId) {
     return pm.increment(table, id, field, amount);
   }
   var getTable = function(tableName) {
-    return T (this,tableName);
+    return ParseTable (this,tableName);
+  }
+  var arrayAdd = function (table, id, field, elements, method) {
+    return pm.arrayAdd(table, id, field, elements, method);
   }
   return {addItem       : addItem,
           updateItem    : updateItem,
@@ -28,30 +30,34 @@ var D = function (appId, restId) {
           getIncludeItem: getIncludeItem,
           incrementField: incrementField,
           getTable      : getTable,
+          arrayAdd      : arrayAdd
          };
 }
-//T - класс таблицы Parse.com. В нем d - экземпляр класса базы данных Parse.com
-var T = function (d,tableName) {
+//parseDb - экземпляр класса базы данных ParseDb в Parse.com
+var ParseTable = function (parseDb,tableName) {
   var addItem = function (object) {
-    return d.addItem(tableName,object);
+    return parseDb.addItem(tableName,object);
   }
   var updateItem = function (id, object) {
-    return d.updateItem(tableName, id, object);
+    return parseDb.updateItem(tableName, id, object);
   }
   var getItem = function (id) {
-    return d.getItem(tableName,id);
+    return parseDb.getItem(tableName,id);
   }
   var getIncludeItem = function (id, fieldToInclude) {
-    return d.getIncludeItem(tableName, id, fieldToInclude);
+    return parseDb.getIncludeItem(tableName, id, fieldToInclude);
   }
   var incrementField = function (id, field, amount) {
-    return d.incrementField (tableName, id, field, amount);
+    return parseDb.incrementField (tableName, id, field, amount);
   }
   var getName = function() {
     return tableName;
   }
   var getRecord = function (id) {
-    return R (this,id);
+    return ParseRecord (this,id);
+  }
+  var arrayAdd = function (id, field, elements, method) {
+    return parseDb.arrayAdd(tableName, id, field, elements, method);
   }
   return {addItem       : addItem,
           updateItem    : updateItem,
@@ -59,55 +65,32 @@ var T = function (d,tableName) {
           getIncludeItem: getIncludeItem,
           incrementField: incrementField,
           getName       : getName,
-          getRecord     : getRecord
+          getRecord     : getRecord,
+          arrayAdd      : arrayAdd
          };
 }
-//R - класс строки таблицы
-var R = function (t, id) {
+//ParseRecord - класс строки таблицы
+//parseTable - экземпляр класса ParseTable
+var ParseRecord = function (parseTable, id) {
   var updateItem = function (object) {
-    return t.updateItem (id, object);
+    return parseTable.updateItem (id, object);
   }
   var getItem = function () {
-    return t.getItem (id);
+    return parseTable.getItem (id);
   }
   var getIncludeItem = function (fieldToInclude) {
-    return t.getIncludeItem (id, fieldToInclude);
+    return parseTable.getIncludeItem (id, fieldToInclude);
   }
   var incrementField = function (field, amount) {
-    return t.incrementField (id, field, amount);
+    return parseTable.incrementField (id, field, amount);
+  }
+  var arrayAdd = function (field, elements, method) {
+    return parseTable.arrayAdd (id, field, elements, method);
   }
   return {updateItem: updateItem,
-          getItem: getItem,
+          getItem       : getItem,
           getIncludeItem: getIncludeItem,
-          incrementField: incrementField
+          incrementField: incrementField,
+          arrayAdd      : arrayAdd
          }
-}
-function testT() {
- //  var d = new D("<<yourKey>>","<<yourKey>>");
- // var t = d.getTable('Contracts');
- // var r = t.getRecord("jgLKC4PExz");
- //  Logger.log(r.getItem());
- //tests
- //  d.addItem("_User",{username:"aaaaaaaaaaaaaa", password:"bbb"});
- //  d.updateItem("Contracts","jgLKC4PExz", {theirNumber: "10"});
- //  Logger.log(d.getItem("Contracts","jgLKC4PExz"));
- //  Logger.log(d.getIncludeItem("Contracts","jgLKC4PExz","ownerid"));
- //  d.incrementField("Contracts","jgLKC4PExz", "delme", "100");
-  
-//  t.incrementField("jgLKC4PExz", "delme", "100");
-//  Logger.log(t.getItem("jgLKC4PExz"));
-//  Logger.log(t.getIncludeItem("jgLKC4PExz","ownerid"));
-  //  Logger.log(t.addItem({asdfasdf:235234}));
-  //  Logger.log(t.addItem({contractName: "sadfasdfasd", pdfUrl:"235234"}))
-  //  Logger.log(t.getName());
-  //  Logger.log(t.updateItem("jgLKC4PExz", {theirNumber: "20"}));
-  
-  //  d.addItem('table',{obj:'obj'});
-  //  var t1 = d.getTable('table1');
-//  Logger.log(t1.getName());
-//  
-//  var t2 = d.getTable('table2');
-//  Logger.log(t2.getName());
-//  t2.addItem({c:888});
-//  Logger.log(t1.getName());
 }
